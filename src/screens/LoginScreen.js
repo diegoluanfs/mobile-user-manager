@@ -1,42 +1,47 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
-import ErrorMessage from '../components/ErrorMessage';
-import api from '../services/api';
+import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import axios from 'axios';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
 
   const handleLogin = async () => {
     try {
-      const response = await api.post('/User/login', { email, password });
-      console.log('Login successful:', response.data);
-      setError('');
-    } catch (err) {
-      console.error('Login failed:', err.response?.data || err.message);
-      setError(err.response?.data?.message || 'Erro ao realizar login');
+      const response = await axios.post('http://core-ww7u.onrender.com/api/User/login', {
+        email,
+        password,
+      });
+
+      if (response.status === 200) {
+        Alert.alert('Success', 'Login successful!');
+        console.log('Response:', response.data);
+        // Aqui você pode salvar o token ou navegar para outra página
+      }
+    } catch (error) {
+      console.error('Login error:', error.response?.data || error.message);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to log in.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <InputField
+      <TextInput
+        style={styles.input}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
-      <InputField
-        placeholder="Senha"
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
-      <ErrorMessage message={error} />
-      <Button title="Entrar" onPress={handleLogin} />
+      <Button title="Login" onPress={handleLogin} />
     </View>
   );
 };
@@ -45,13 +50,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: 16,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+  input: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 12,
+    paddingHorizontal: 8,
   },
 });
 
